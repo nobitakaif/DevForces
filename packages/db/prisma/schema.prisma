@@ -16,30 +16,61 @@ datasource db {
 
 
 model User{
-  id          String    @unique   @default(uuid()) @id
+  id                              String    @unique   @default(uuid()) @id
+  email                           String    @unique
+  password                        String
+  role                            Role
+  leaderBoard                     Leaderboard[]
+}
+
+enum  Role{
+  Admin
+  User
 }
 
 model Contest{
-  id          String    @unique   @default(uuid()) @id
-  title       String    
-  startTime   DateTime  @default(now())
+  id                              String    @unique   @default(uuid()) @id
+  title                           String    
+  startTime                       DateTime  @default(now())
+  ContestToChallengeMapping       ContestToChallengeMapping[]
+  learderBoard                    Leaderboard[]
 }
 
 model ContestToChallengeMapping{
-  id          String    @unique   @default(uuid()) @id
-  contestId   String
-  challengeId String
-  index       Int
+  id                              String    @unique   @default(uuid()) @id
+  contestId                       String
+  challengeId                     String
+  index                           Int
+  submission                      Submission[]
+  contest                         Contest @relation(fields: [contestId],references: [id])
+  challenge                       Challenge   @relation(fields: [challengeId],references: [id])
+  @@unique([contestId,challengeId])
 }
 
 model Challenge{
-  id          String    @unique   @default(uuid()) @id
-  title       String
-  notionId    String
-  maxPoint    Int
+  id                            String    @unique   @default(uuid()) @id
+  title                         String
+  notionId                      String
+  maxPoint                      Int
+  contestTochallengMapping      ContestToChallengeMapping[]
 }
 
 model Submission{
-  id          String    @unique   @default(uuid()) @id
-  challengeId String
+  id                            String    @unique   @default(uuid()) @id
+  challengeId                   String
+  contestId                     String
+  contestToChallengeMappingId   String
+  contestToChallengeMapping     ContestToChallengeMapping @relation(fields: [contestToChallengeMappingId],references: [id])
+  points                        Int
+  createdAt                     DateTime @default(now())
+}
+
+model Leaderboard{
+  id                      String    @unique   @default(uuid())
+  contestId               String
+  userId                  String
+  rank                    String
+  user                    User      @relation(fields: [userId],references: [id])
+  contest                 Contest   @relation(fields: [contestId],references: [id])
+  @@unique([contestId,id])
 }
